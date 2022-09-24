@@ -1,0 +1,195 @@
+<html>
+    <head>
+        <style>
+            body{
+              background:url('solar.jpg') no-repeat center center fixed;
+              background-size:cover;
+            }
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 60px;
+  color: aliceblue;
+ 
+}
+
+#root {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  cursor: pointer;
+  margin: 0 auto;
+  width: 500px;
+}
+
+.card {
+  height: 200px;
+  border-radius: 20px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all .3s ease-in-out;
+}
+
+.back, .front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  color: rgb(241, 235, 235);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 150px;
+  border-radius: 20px;
+  
+}
+
+.back {
+  transform: rotateY(180deg);
+  background : url(solar.jpg);
+}
+
+.front {
+  background: rgb(182, 235, 228);
+}
+
+.card.flip {
+  transform: rotateY(180deg);
+}
+
+.card.win .back {
+  background: #0587417a;
+}
+
+.card.lost .back {
+  background: #e9382bd8;
+}
+
+        </style>
+    </head>
+    <body>
+        <h1>Card flip game</h1>
+<div id="root"></div>
+        <script>
+let game; 
+
+
+function Card(num) {
+  this.num = num;
+  this.htmlElement = null;
+}
+
+Card.prototype.handleClick = function(e) {
+  this.htmlElement.classList.toggle('flip');
+    if (!game.firstCard) {
+    game.firstCard = this.num;
+    this.htmlElement.style.pointerEvents = 'none';
+    return;
+  }
+  
+  if(game.firstCard !== this.num) {
+    this.lostCard();
+    setTimeout(() => {
+     game.loose();
+    }, 0)
+    return;
+  }
+  
+   this.winnerCard();
+    setTimeout(() => {
+     game.win();
+    }, 0)
+}
+
+Card.prototype.create = function() {
+  // root 
+  const root = document.querySelector('#root');
+  
+  // card
+  const card = document.createElement('div');
+  card.classList.add('card');
+  
+  // front 
+  const cardFront = document.createElement('div');
+  cardFront.classList.add('front');
+  
+  // back 
+  const cardBack = document.createElement('div');
+  cardBack.classList.add('back');
+  cardBack.innerHTML = this.num;
+  
+  card.appendChild(cardFront);
+  card.appendChild(cardBack);
+  
+  
+  card.addEventListener('click', this.handleClick.bind(this));
+  this.htmlElement = card;
+  return card;
+}
+
+Card.prototype.lostCard = function() {
+  this.htmlElement.classList.add('lost');
+}
+
+Card.prototype.winnerCard = function() {
+  this.htmlElement.classList.add('win');
+}
+
+
+function renderCard(card) {
+  const cardElem = card.create();
+  const root = document.querySelector('#root');
+  root.appendChild(card.create());
+}
+
+
+function getRandomNumbers(qty, max) {
+  const numSet = new Set();
+  while(numSet.size < qty) {
+    numSet.add(Math.floor(Math.random() * max) + 3)
+  }
+  return [...numSet];
+}
+
+
+
+function Game() {
+  this.firstCard = null;
+  
+}
+
+Game.prototype.restart = function() {
+  const root = document.querySelector('#root');
+  root.innerHTML = '';
+  this.firstCard = null;
+  this.start();
+}
+
+Game.prototype.start = function() {
+   // Get 3 unique numbers 
+  let numbers = getRandomNumbers(3, 6);
+  numbers = [...numbers, ...numbers].sort(() => Math.random() - 0.5);
+
+  numbers.forEach(number => {
+    renderCard(new Card(number))
+  })
+}
+
+Game.prototype.loose = function() {
+  alert('You lost the Game !!!!');
+  this.restart();
+}
+
+Game.prototype.win = function() {
+  alert('You win the Game !!!!');
+  this.restart();
+}
+
+
+
+game = new Game();
+game.start()
+
+        </script>
+    </body>
+</html>
